@@ -1,0 +1,20 @@
+'use strict';
+
+const express = require('express');
+const router = express('Router');
+
+module.exports = (logger, models) => {
+
+    const controller = require('../controllers/posts')(logger, models);
+
+    const ctrl = new controller();
+
+    router.get('/', (req, res, next) => ctrl.list(req, res, next));
+    router.get('/:id', (req, res, next) => ctrl.get(req, res, next));
+    router.post('/', (req, res, next) => ctrl.post(req, res, next));
+    router.put('/:id', (req, res, next) => ctrl.put(req, res, next));
+    router.delete('/:id', (req, res, next) => ctrl.delete(req, res, next));
+    router.param('id', (req, res, next) => ctrl.param(req, res, next));
+
+    return router;
+};
