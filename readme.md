@@ -64,7 +64,7 @@ This will run integrations tests (you **must** have the server up and running)
 If this was intended to be deployed to production we should:
 - Improve the logging solution to keep all the log information centralized and easy to query if needed.
 - Add a Swagger documentation and/or postman collection to help the frontend and QA to test and use this API
-- Use the kubernetes and terraform to deploy
+- Use kubernetes and terraform to deploy
 
 ## License
 

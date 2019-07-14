@@ -9,19 +9,40 @@ module.exports = (logger, db) => {
         async list(req, res, next) {
             try {
 
-                const filters = {};
+                const search = (req.query.search) ? req.query.search : null;
+                const page = (req.query.page) ? req.query.page : 1;
+                const limit = (req.query.limit) ? parseInt(req.query.limit) : this.limit;
+                const offset = limit * (page - 1);
+                let filters = {};
 
                 const populateObj = {
                     path: 'author',
                     select: 'email'
                 };
 
+                if (search) {
+                    filters.$or = [{
+                        title: {
+                            '$regex': '.*' + search + '.*',
+                            '$options': 'i'
+                        }
+                    }, {
+                        body: {
+                            '$regex': '.*' + search + '.*',
+                            '$options': 'i'
+                        }
+                    }];
+                }
+
                 const totalResults = await db.models.Post.countDocuments(filters);
-                const results = await db.models.Post.find(filters, null).populate(populateObj);
+                const results = await db.models.Post.find(filters, null, {
+                    skip: offset,
+                    limit: limit
+                }).populate(populateObj);
 
                 const response = {
                     total: totalResults,
-                    totalPages: Math.ceil(totalResults / this.limit),
+                    totalPages: Math.ceil(totalResults / limit),
                     data: results
                 };
 

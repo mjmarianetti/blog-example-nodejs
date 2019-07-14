@@ -21,7 +21,7 @@ module.exports = (db) => {
     describe('GET /posts', () => {
 
 
-        before((done) => {
+        beforeEach((done) => {
             db.models.User.remove({})
                 .then(() => {
                     return db.models.Post.remove({});
@@ -42,6 +42,7 @@ module.exports = (db) => {
                     done(err);
                 });
         });
+
 
         it('should get an empty list of posts', (done) => {
             client.get('posts')
@@ -64,23 +65,129 @@ module.exports = (db) => {
         });
 
         it('should get a list of posts with limit param', (done) => {
-            client.get('posts')
+
+            const post = {
+                title: "my new test",
+                body: "this is the post body content"
+            };
+
+            let promises = [];
+
+            promises.push(client.post('posts')
                 .type('json')
                 .set('Accept', 'application/json')
                 .query({
                     token: token
                 })
+                .expect('Content-Type', /json/)
+                .send(post));
+
+
+            promises.push(client.post('posts')
+                .type('json')
+                .set('Accept', 'application/json')
                 .query({
-                    limit: 1
+                    token: token
                 })
                 .expect('Content-Type', /json/)
-                .expect(200)
-                .expect(
-                    (res) => {
-                        expect(res.statusCode).to.eql(200);
-                    }
-                )
-                .end(done);
+                .send(post));
+
+
+
+            promises.push(client.post('posts')
+                .type('json')
+                .set('Accept', 'application/json')
+                .query({
+                    token: token
+                })
+                .expect('Content-Type', /json/)
+                .send(post));
+
+            Promise.all(promises)
+                .then(() => {
+                    return client.get('posts')
+                        .type('json')
+                        .set('Accept', 'application/json')
+                        .query({
+                            limit: 1
+                        })
+                        .expect('Content-Type', /json/)
+                        .expect(200);
+                })
+                .then((res) => {
+                    expect(res.statusCode).to.eql(200);
+                    expect(res.body.total).to.be.eql(3);
+                    expect(res.body.totalPages).to.be.eql(3);
+                    expect(res.body.data.length).to.be.eql(1);
+                    done();
+                })
+                .catch((err) => {
+                    done(err);
+                })
+        });
+
+        it('should get a filtered list of posts', (done) => {
+
+            const post = {
+                title: "my new test",
+                body: "this is the post body content"
+            };
+
+            const postToSearch = {
+                title: "a great post to read",
+                body: "this is the post body content"
+            };
+
+            let promises = [];
+
+            promises.push(client.post('posts')
+                .type('json')
+                .set('Accept', 'application/json')
+                .query({
+                    token: token
+                })
+                .expect('Content-Type', /json/)
+                .send(post));
+
+
+            promises.push(client.post('posts')
+                .type('json')
+                .set('Accept', 'application/json')
+                .query({
+                    token: token
+                })
+                .expect('Content-Type', /json/)
+                .send(post));
+
+
+
+            promises.push(client.post('posts')
+                .type('json')
+                .set('Accept', 'application/json')
+                .query({
+                    token: token
+                })
+                .expect('Content-Type', /json/)
+                .send(postToSearch));
+
+            Promise.all(promises)
+                .then(() => {
+                    return client.get('posts')
+                        .type('json')
+                        .set('Accept', 'application/json')
+                        .expect('Content-Type', /json/)
+                        .query({
+                            search: 'read'
+                        })
+                        .expect(200);
+                })
+                .then((res) => {
+                    expect(res.statusCode).to.eql(200);
+                    expect(res.body.total).to.be.eql(1);
+                    expect(res.body.totalPages).to.be.eql(1);
+                    expect(res.body.data[0].title).to.be.eql(postToSearch.title);
+                    done();
+                })
         });
 
         it('should get a list of posts with author data', (done) => {
