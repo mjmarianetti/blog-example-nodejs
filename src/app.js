@@ -5,27 +5,20 @@ const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
-const mongoose = require('mongoose');
+
+const passport = require('passport');
 const app = express();
 
 const logger = require('./helpers/logger')(config);
 const ResponseHelper = require('./helpers/response-helper')(logger);
 
-const models = require('./models')(mongoose);
-const routes = require('./routes')(logger, models);
+const db = require('./models')();
+const routes = require('./routes')(logger, db, passport);
 
-const middlewares = require('./middlewares')();
-
-mongoose.set('debug', true);
-mongoose.connect(config.database.host, config.database.options);
-mongoose.connection.on('error', logger.error.bind(console, 'MongoDB connection error:'));
-mongoose.connection.once('open', () => {
-    logger.info("Connected successfully to database");
-});
+const middlewares = require('./middlewares')(db);
 
 logger.info('Running env:  ' + config.env);
 logger.info('Using database:  ' + config.database.database);
-
 
 app.use(helmet());
 app.use(morgan('combined', {
@@ -38,6 +31,11 @@ app.use(bodyParser.urlencoded({
 
 //enable cors
 app.use(middlewares.Cors.enableCors);
+
+
+passport.use('signup', middlewares.Auth.signup);
+passport.use('login', middlewares.Auth.login);
+passport.use(middlewares.Auth.verify);
 
 app.use('/', routes);
 

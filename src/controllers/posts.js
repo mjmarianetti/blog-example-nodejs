@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = (logger, models) => {
+module.exports = (logger, db) => {
 
     const BaseController = require('./base')(logger);
 
@@ -11,8 +11,8 @@ module.exports = (logger, models) => {
 
                 const filters = {};
 
-                const totalResults = await models.Post.countDocuments(filters);
-                const results = await models.Post.find(filters, null);
+                const totalResults = await db.models.Post.countDocuments(filters);
+                const results = await db.models.Post.find(filters, null);
 
                 const response = {
                     total: totalResults,
@@ -29,7 +29,7 @@ module.exports = (logger, models) => {
 
         async get(req, res, next) {
             try {
-                const result = await models.Post.findById(req.params.id);
+                const result = await db.models.Post.findById(req.params.id);
                 if (!result) {
                     return this.notFound(req, res);
                 }
@@ -42,7 +42,7 @@ module.exports = (logger, models) => {
         async post(req, res, next) {
 
             try {
-                let item = new models.Post(req.body);
+                let item = new db.models.Post(req.body);
                 const result = await item.save();
 
                 if (!result) {
@@ -58,7 +58,7 @@ module.exports = (logger, models) => {
         async put(req, res, next) {
 
             try {
-                const item = await models.Post.findById(req.params.id);
+                const item = await db.models.Post.findById(req.params.id);
 
                 item.title = req.body.title;
                 item.body = req.body.body;
@@ -77,7 +77,7 @@ module.exports = (logger, models) => {
 
         async delete(req, res, next) {
             try {
-                const result = await models.Post.findById(req.params.id);
+                const result = await db.models.Post.findById(req.params.id);
                 if (!result) {
                     //this needs to be idempotent, otherwise we could return a 404 NOT FOUND
                     return res.status(200).json({

@@ -3,13 +3,16 @@
 const express = require('express');
 const router = express('Router');
 
-module.exports = (logger, models) => {
+module.exports = (logger, models, passport) => {
 
     const controller = require('../controllers/posts')(logger, models);
 
     const ctrl = new controller();
 
-    router.get('/', (req, res, next) => ctrl.list(req, res, next));
+    router.get('/', passport.authenticate('jwt', {
+        session: false
+    }), (req, res, next) => ctrl.list(req, res, next));
+    
     router.get('/:id', (req, res, next) => ctrl.get(req, res, next));
     router.post('/', (req, res, next) => ctrl.post(req, res, next));
     router.put('/:id', (req, res, next) => ctrl.put(req, res, next));
