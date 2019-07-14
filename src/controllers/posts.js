@@ -11,15 +11,19 @@ module.exports = (logger, db) => {
 
                 const filters = {};
 
+                const populateObj = {
+                    path: 'author',
+                    select: 'email'
+                };
+
                 const totalResults = await db.models.Post.countDocuments(filters);
-                const results = await db.models.Post.find(filters, null);
+                const results = await db.models.Post.find(filters, null).populate(populateObj);
 
                 const response = {
                     total: totalResults,
                     totalPages: Math.ceil(totalResults / this.limit),
                     data: results
                 };
-
 
                 return res.status(200).json(response);
             } catch (error) {
@@ -43,6 +47,9 @@ module.exports = (logger, db) => {
 
             try {
                 let item = new db.models.Post(req.body);
+
+                item.author = req.user._id;
+
                 const result = await item.save();
 
                 if (!result) {
@@ -60,6 +67,7 @@ module.exports = (logger, db) => {
             try {
                 const item = await db.models.Post.findById(req.params.id);
 
+                item.author = req.user._id;
                 item.title = req.body.title;
                 item.body = req.body.body;
 

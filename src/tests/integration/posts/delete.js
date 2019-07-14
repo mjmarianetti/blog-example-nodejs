@@ -19,6 +19,7 @@ module.exports = (db) => {
         email: "test@test.com",
         password: "123456"
     };
+    
     describe('DELETE /posts', () => {
 
 
@@ -27,7 +28,7 @@ module.exports = (db) => {
             body: "this is the post body content"
         };
 
-        
+
         before((done) => {
             db.models.User.remove({})
                 .then(() => {
@@ -63,7 +64,9 @@ module.exports = (db) => {
                 .send(post)
                 .expect(200)
                 .then((res) => {
-                    return client.delete('posts/' + res.body.id);
+                    return client.delete('posts/' + res.body.id).query({
+                        token: token
+                    });
                 })
                 .then((res) => {
                     expect(res.statusCode).to.eql(200);
@@ -90,12 +93,16 @@ module.exports = (db) => {
                 .expect(200)
                 .then((res) => {
                     postId = res.body.id;
-                    return client.delete('posts/' + postId);
+                    return client.delete('posts/' + postId).query({
+                        token: token
+                    });
                 })
                 .then((res) => {
                     expect(res.statusCode).to.eql(200);
                     expect(res.body.message).to.not.be.undefined;
-                    return client.delete('posts/' + postId);
+                    return client.delete('posts/' + postId).query({
+                        token: token
+                    });
                 })
                 .then((res) => {
                     expect(res.statusCode).to.eql(200);

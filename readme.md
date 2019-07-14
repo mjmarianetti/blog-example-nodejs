@@ -9,7 +9,7 @@ This is an example of an API for a blogging platform implemented with NodeJS and
 
 The following packages are required by this package
 
-| Package Name | Minimum required version |
+| Package Name | Description |
 | ------------ |  ------------------------ |
 | MochaJS |  6.1.4+ |
 | NodeJS |  10.15.3+ |

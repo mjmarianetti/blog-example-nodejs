@@ -83,16 +83,44 @@ module.exports = (db) => {
                 .end(done);
         });
 
-
-
-        /*  it('should get a list of posts', (done) => {
+        it('should get a list of posts with author data', (done) => {
 
             const post = {
                 title: "my new test",
                 body: "this is the post body content"
             };
 
-   
+            let promises = [];
+
+            promises.push(client.post('posts')
+                .type('json')
+                .set('Accept', 'application/json')
+                .query({
+                    token: token
+                })
+                .expect('Content-Type', /json/)
+                .send(post));
+
+
+            promises.push(client.post('posts')
+                .type('json')
+                .set('Accept', 'application/json')
+                .query({
+                    token: token
+                })
+                .expect('Content-Type', /json/)
+                .send(post));
+
+
+
+            promises.push(client.post('posts')
+                .type('json')
+                .set('Accept', 'application/json')
+                .query({
+                    token: token
+                })
+                .expect('Content-Type', /json/)
+                .send(post));
 
             Promise.all(promises)
                 .then(() => {
@@ -106,13 +134,13 @@ module.exports = (db) => {
                     expect(res.statusCode).to.eql(200);
                     expect(res.body.total).to.be.eql(3);
                     expect(res.body.totalPages).to.be.eql(1);
-                    expect(res.body.data).to.be.eql([post, post]);
+                    expect(res.body.data[0].author.email).to.be.eql(user.email);
                     done();
                 })
                 .catch((err) => {
                     done(err);
                 })
-        });*/
+        });
 
     });
 }
