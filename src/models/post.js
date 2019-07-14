@@ -2,7 +2,9 @@
 
 module.exports = (mongoose) => {
 
-    var Schema = mongoose.Schema;
+    const Schema = mongoose.Schema;
+    const STATUSES = ['public', 'private', 'draft'];
+    const DEFAULT_STATUS = STATUSES[0];
 
     const Post = new Schema({
         title: {
@@ -12,6 +14,11 @@ module.exports = (mongoose) => {
         body: {
             type: String,
             required: true
+        },
+        status: {
+            type: String,
+            enum: STATUSES,
+            required: false
         },
         author: {
             type: Schema.Types.ObjectId,
@@ -33,6 +40,16 @@ module.exports = (mongoose) => {
         toJSON: {
             virtuals: true
         }
+    });
+
+
+    Post.pre('save', async function (next) {
+        const post = this;
+
+        if (!post.status) {
+            post.status = DEFAULT_STATUS;
+        }
+        next();
     });
 
 

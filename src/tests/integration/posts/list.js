@@ -249,5 +249,66 @@ module.exports = (db) => {
                 })
         });
 
+        it('should get a list of public posts', (done) => {
+
+            const post = {
+                title: "my new test",
+                body: "this is the post body content"
+            };
+
+            const privatePost = {
+                title: "a great post to read",
+                body: "this is the post body content",
+                status: "private"
+            };
+
+            let promises = [];
+
+            promises.push(client.post('posts')
+                .type('json')
+                .set('Accept', 'application/json')
+                .query({
+                    token: token
+                })
+                .expect('Content-Type', /json/)
+                .send(post));
+
+
+            promises.push(client.post('posts')
+                .type('json')
+                .set('Accept', 'application/json')
+                .query({
+                    token: token
+                })
+                .expect('Content-Type', /json/)
+                .send(post));
+
+
+            promises.push(client.post('posts')
+                .type('json')
+                .set('Accept', 'application/json')
+                .query({
+                    token: token
+                })
+                .expect('Content-Type', /json/)
+                .send(privatePost));
+
+            Promise.all(promises)
+                .then(() => {
+                    return client.get('posts')
+                        .type('json')
+                        .set('Accept', 'application/json')
+                        .expect('Content-Type', /json/)
+                        .expect(200);
+                })
+                .then((res) => {
+                    expect(res.statusCode).to.eql(200);
+                    expect(res.body.total).to.be.eql(2);
+                    expect(res.body.totalPages).to.be.eql(1);
+                    done();
+                })
+        });
+
+
     });
 }

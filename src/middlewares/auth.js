@@ -4,8 +4,7 @@ const ExtractJWT = require('passport-jwt').ExtractJwt;
 
 const config = require('../config/app');
 
-
-module.exports = (db) => {
+module.exports = (db, passport) => {
 
     const USERNAME_FIELD = 'email',
         PASSWORD_FIELD = 'password',
@@ -66,6 +65,23 @@ module.exports = (db) => {
             done(error);
         }
     });
+
+    auth.loadUser = (req, res, next) => {
+        let token = req.query[JWT_QUERY_FIELD];
+        if (!token) {
+            next();
+        } else {
+            passport.authenticate('jwt', {
+                session: false
+            }, (err, user, info) => {
+                if (err) {
+                    return next(err);
+                }
+                req.user = user;
+                next();
+            })(req,res,next);
+        }
+    };
 
     return auth;
 };

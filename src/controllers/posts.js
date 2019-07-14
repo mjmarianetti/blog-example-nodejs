@@ -13,7 +13,9 @@ module.exports = (logger, db) => {
                 const page = (req.query.page) ? req.query.page : 1;
                 const limit = (req.query.limit) ? parseInt(req.query.limit) : this.limit;
                 const offset = limit * (page - 1);
-                let filters = {};
+                let filters = {
+                    status: 'public'
+                };
 
                 const populateObj = {
                     path: 'author',
@@ -54,8 +56,17 @@ module.exports = (logger, db) => {
 
         async get(req, res, next) {
             try {
-                const result = await db.models.Post.findById(req.params.id);
+                const populateObj = {
+                    path: 'author',
+                    select: 'email'
+                };
+
+                const result = await db.models.Post.findById(req.params.id).populate(populateObj);
                 if (!result) {
+                    return this.notFound(req, res);
+                }
+
+                if (result.status !== 'public' && (!req.user || req.user._id !== result.author.id)) {
                     return this.notFound(req, res);
                 }
                 return res.status(200).json(result);
@@ -91,6 +102,7 @@ module.exports = (logger, db) => {
                 item.author = req.user._id;
                 item.title = req.body.title;
                 item.body = req.body.body;
+                item.status = req.body.status || 'public';
 
                 const result = await item.save();
 

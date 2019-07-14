@@ -20,7 +20,7 @@ module.exports = (db) => {
         password: "123456"
     };
 
-    describe('POST /posts', () => {
+    describe('PUT /posts/{id}', () => {
 
         before((done) => {
             db.models.User.remove({})
@@ -49,8 +49,9 @@ module.exports = (db) => {
             body: "this is the post body content"
         };
 
-        it('should create a new post', (done) => {
+        it('should create a new post and update its title', (done) => {
 
+            let updatedTitle = "new updated title";
             client.post('posts')
                 .type('json')
                 .set('Accept', 'application/json')
@@ -62,7 +63,22 @@ module.exports = (db) => {
                 .expect(200)
                 .then((res) => {
                     expect(res.statusCode).to.eql(200);
-                    expect(res.body).to.have.property('id');
+
+                    res.body.title = updatedTitle;
+
+
+                    return client.put('posts/' + res.body.id)
+                        .type('json')
+                        .set('Accept', 'application/json')
+                        .query({
+                            token: token
+                        })
+                        .expect('Content-Type', /json/)
+                        .send(res.body)
+                })
+                .then((res) => {
+                    expect(res.statusCode).to.eql(200);
+                    expect(res.body.title).to.be.eql(updatedTitle);
                     done();
                 })
                 .catch((err) => {
@@ -70,8 +86,7 @@ module.exports = (db) => {
                 });
         });
 
-
-        it('should create a new post and the status should be public', (done) => {
+        it('should create a new post and update its status to private', (done) => {
 
             client.post('posts')
                 .type('json')
@@ -84,65 +99,28 @@ module.exports = (db) => {
                 .expect(200)
                 .then((res) => {
                     expect(res.statusCode).to.eql(200);
-                    expect(res.body).to.have.property('id');
                     expect(res.body.status).to.be.eql('public');
+
+                    res.body.status = 'private';
+
+                    return client.put('posts/' + res.body.id)
+                        .type('json')
+                        .set('Accept', 'application/json')
+                        .query({
+                            token: token
+                        })
+                        .expect('Content-Type', /json/)
+                        .send(res.body);
+                })
+                .then((res) => {
+                    expect(res.statusCode).to.eql(200);
+                    expect(res.body.status).to.be.eql('private');
                     done();
                 })
                 .catch((err) => {
                     done(err);
                 });
         });
-
-        describe('validate params', () => {
-
-            it('should return error if title not provided', (done) => {
-
-                const postData = JSON.parse(JSON.stringify(post));
-                delete postData.title;
-
-                client.post('posts')
-                    .type('json')
-                    .set('Accept', 'application/json')
-                    .expect('Content-Type', /json/)
-                    .query({
-                        token: token
-                    })
-                    .send(postData)
-                    .expect(500)
-                    .expect(
-                        (res) => {
-                            expect(res.statusCode).to.eql(500);
-                            expect(res.body.message.errors.title.message).to.not.be.undefined;
-                        }
-                    )
-                    .end(done);
-            });
-
-            it('should return error if body not provided', (done) => {
-
-                const postData = JSON.parse(JSON.stringify(post));
-                delete postData.body;
-
-                client.post('posts')
-                    .type('json')
-                    .set('Accept', 'application/json')
-                    .expect('Content-Type', /json/)
-                    .query({
-                        token: token
-                    })
-                    .send(postData)
-                    .expect(500)
-                    .expect(
-                        (res) => {
-                            expect(res.statusCode).to.eql(500);
-                            expect(res.body.message.errors.body.message).to.not.be.undefined;
-                        }
-                    )
-                    .end(done);
-            });
-        });
-
-
     });
 
 }

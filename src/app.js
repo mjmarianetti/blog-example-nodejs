@@ -15,7 +15,7 @@ const ResponseHelper = require('./helpers/response-helper')(logger);
 const db = require('./models')();
 const routes = require('./routes')(logger, db, passport);
 
-const middlewares = require('./middlewares')(db);
+const middlewares = require('./middlewares')(db, passport);
 
 logger.info('Running env:  ' + config.env);
 logger.info('Using database:  ' + config.database.database);
@@ -31,7 +31,6 @@ app.use(bodyParser.urlencoded({
 
 //enable cors
 app.use(middlewares.Cors.enableCors);
-
 
 passport.use('signup', middlewares.Auth.signup);
 passport.use('login', middlewares.Auth.login);

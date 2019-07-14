@@ -29,7 +29,9 @@ describe("TESTS", () => {
 
     describe("POSTS", () => {
         importTest("create", './posts/create');
+        importTest("get", './posts/get');
         importTest("delete", './posts/delete');
         importTest("list", './posts/list');
+        importTest("update", './posts/update');
     });
 })

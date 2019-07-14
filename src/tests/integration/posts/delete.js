@@ -20,7 +20,7 @@ module.exports = (db) => {
         password: "123456"
     };
     
-    describe('DELETE /posts', () => {
+    describe('DELETE /posts/{id}', () => {
 
 
         const post = {
