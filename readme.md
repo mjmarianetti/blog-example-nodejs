@@ -74,9 +74,9 @@ The following endpoints are available
 | ------------ |  ------------------------ | ------------------------ |
 | GET /posts |  get a list of public posts  | not required  |
 | GET /posts/{id} | get a public post, or get a private post for the authenticated user  | not required |
-| POST /posts | create a new post, requires JWT  | required |
-| PUT /posts/{id} | update a post, requires JWT, you can only update posts made by the current user  | required |
-| DELETE /posts/{id} | deletes a post, requires JWT, you can only delete posts made by the current user  | required |
+| POST /posts | create a new post  | required |
+| PUT /posts/{id} | update a post, you can only update posts made by the current user  | required |
+| DELETE /posts/{id} | delete a post, you can only delete posts made by the current user  | required |
 | POST /users/login |  allows the user to login and obtain a JWT  | not required |
 | POST /users/signup | allows the user to signup to the application  | not required |
 
@@ -84,10 +84,11 @@ The following endpoints are available
 
 If this was intended to be deployed to production we should:
 - Improve the logging solution to keep all the log information centralized and easy to query if needed.
-- Add a Swagger documentation and/or postman collection to help the frontend and QA to test and use this API
-- Use kubernetes and terraform to deploy
-- Add unit tests for every class and function
+- Add a Swagger documentation and/or postman collection to help the frontend and QA to test and use this API.
+- Use kubernetes and terraform to deploy.
+- Add unit tests for every class and function.
 - Improve request validation, separate the entities from the mongoose library. Add a DAO layer to make it easier to switch the database engine.
+- Use Redis or another key/value database to manage JWT validation and allow us to invalidate tokens from the server-side.
 
 ## License
 
